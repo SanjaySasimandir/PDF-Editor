@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Document, Page } from "react-pdf";
 import "./App.css";
 import { pdfjs } from "react-pdf";
-import { relative } from "path";
+import Axios from "axios";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -90,6 +90,25 @@ function App() {
     });
   };
 
+  const resetPDF = () => {
+    setPageOrder(Array.from({ length: totalPages }, (_, index) => index + 1));
+  };
+
+  const [newPDFName, setNewPDFName] = useState("");
+  const handleFileUpload = () => {
+    const fd = new FormData();
+    if (selectedFile && pageOrder) {
+      fd.append("file", selectedFile);
+      fd.append("pageOrder", JSON.stringify(pageOrder));
+    }
+    Axios.post("http://localhost:4000/upload", fd)
+      .then((res) => {
+        console.log(res.data);
+        setNewPDFName(res.data.file);
+      })
+      .catch((err) => console.log(err));
+  };
+
   return (
     <div className="App bg-gray-800">
       <link
@@ -110,6 +129,25 @@ function App() {
         onChange={handleFileSelection}
         ref={inputRef}
       />
+      <button
+        className="bg-red-900 rounded-full text-white font-semibold text-sm hover:bg-red-800 px-4 py-2"
+        onClick={resetPDF}
+      >
+        Reset
+      </button>
+      <button
+        className="bg-blue-900 rounded-full text-white font-semibold text-sm hover:bg-blue-800 px-4 py-2"
+        onClick={handleFileUpload}
+      >
+        Get Download Link
+      </button>
+      <a
+        className="bg-indigo-900 rounded-full text-white font-semibold text-sm hover:bg-indigo-800 px-4 py-2"
+        href={"http://localhost:4000/download/" + newPDFName}
+        download
+      >
+        Download PDF
+      </a>
       <Document
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
         file={selectedFile}
