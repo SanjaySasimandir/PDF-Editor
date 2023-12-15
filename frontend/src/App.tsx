@@ -1,16 +1,15 @@
 import React, {
   ChangeEvent,
   createContext,
-  useEffect,
   useRef,
   useState,
 } from "react";
-import { Document, Page } from "react-pdf";
 import "./App.css";
 import { pdfjs } from "react-pdf";
 import Axios from "axios";
 import { Editor } from "./components/editor";
 import { Modal } from "./components/modal";
+import { Toolbar } from "./components/toolbar";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -19,14 +18,9 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 export const EditorContext = createContext({
   selectedFile: null as File | null,
-  setSelectedFile: (file: File | null) => {},
-  totalPages: 1,
   setTotalPages: (number: number) => {},
   pageOrder: [] as number[],
   setPageOrder: (numbers: number[]) => {},
-  movePageUp: (pageNumber: number) => {},
-  movePageDown: (pageNumber: number) => {},
-  deletePage: (index: number) => {},
   selectedPage: 1,
   setSelectedPage: (number: number) => {},
 });
@@ -34,6 +28,16 @@ export const EditorContext = createContext({
 export const ModalContext = createContext({
   newPDFName: "",
   setShowModal: (showModal: boolean) => {},
+});
+export const ToolbarContext = createContext({
+  pageOrder: [] as number[],
+  movePageUp: () => {},
+  movePageDown: () => {},
+  deletePage: () => {},
+  selectedPage: 1,
+  unselectFile: () => {},
+  resetPDF: () => {},
+  handleFileUpload: () => {},
 });
 
 function App() {
@@ -132,7 +136,7 @@ function App() {
         <div className="flex items-center justify-center h-screen">
           <button
             className="px-4 py-2 font-semibold text-sm bg-cyan-500 text-white rounded-full shadow-sm hover:bg-cyan-600 
-        active:bg-cyan-700 focus:outline-none focus:ring focus:ring-cyan-300"
+        active:bg-cyan-700 focus:outline-none focus:ring focus:ring-cyan-300 scale-125"
             onClick={handleUploadClick}
           >
             Upload
@@ -150,74 +154,27 @@ function App() {
 
       {selectedFile && (
         <div>
-          <div className="md:container mx-auto flex justify-between px-2 pt-4">
-            <button
-              className="font-semibold text-[#0071e3] text-sm hover:bg-[red-800] px-2 z-50"
-              onClick={unselectFile}
-            >
-              <span className="material-symbols-outlined">arrow_back</span>
-            </button>
-
-            <div className="fixed inset-x-0 top-0 flex justify-center z-40 p-5 max-[639px]:mt-[75px]">
-              <div className="drop-shadow-2xl">
-                <button
-                  className="px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-l-md shadow-sm ring-1 ring-slate-900/5 hover:bg-[#0071e3] hover:text-white disabled:opacity-70 disabled:cursor-not-allowed"
-                  onClick={movePageUp}
-                  disabled={selectedPage === pageOrder[0]}
-                >
-                  <span className="material-symbols-outlined">
-                    arrow_upward
-                  </span>
-                </button>
-                <button
-                  className="px-4 py-2 font-semibold text-sm bg-white text-slate-700  shadow-sm ring-1 ring-slate-900/5 hover:bg-[#0071e3] hover:text-white disabled:opacity-70 disabled:cursor-not-allowed"
-                  onClick={movePageDown}
-                  disabled={selectedPage === pageOrder[pageOrder.length - 1]}
-                >
-                  <span className="material-symbols-outlined">
-                    arrow_downward
-                  </span>
-                </button>
-                <button
-                  className="px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-r-md shadow-sm ring-1 ring-slate-900/5 hover:text-white hover:bg-[#f44336] disabled:opacity-70 disabled:cursor-not-allowed"
-                  onClick={deletePage}
-                  disabled={pageOrder.length === 1}
-                >
-                  <span className="material-symbols-outlined">delete</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="space-x-4 z-50">
-              <button
-                className="underline rounded-full text-[#0071e3] font-semibold text-sm px-2 py-2 hover:bg-white hover:px-2"
-                onClick={resetPDF}
-              >
-                Reset
-              </button>
-
-              <button
-                className="bg-[#0071e3] rounded-full text-white font-semibold text-sm hover:bg-blue-800 px-4 py-2 disabled:opacity-50"
-                onClick={handleFileUpload}
-                disabled={pageOrder.length === 0}
-              >
-                Get Download Link
-              </button>
-            </div>
-          </div>
-
+          <ToolbarContext.Provider
+            value={{
+              pageOrder,
+              selectedPage,
+              unselectFile,
+              movePageUp,
+              movePageDown,
+              deletePage,
+              handleFileUpload,
+              resetPDF,
+            }}
+          >
+            <Toolbar></Toolbar>
+          </ToolbarContext.Provider>
           <div className="bg-[#141414] md:container mx-auto md:px-2 md:py-2 mt-4 rounded-lg max-[639px]:mt-[80px]">
             <EditorContext.Provider
               value={{
                 selectedFile,
-                setSelectedFile,
-                totalPages,
                 setTotalPages,
                 pageOrder,
                 setPageOrder,
-                movePageUp,
-                movePageDown,
-                deletePage,
                 selectedPage,
                 setSelectedPage,
               }}

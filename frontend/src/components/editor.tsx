@@ -5,14 +5,9 @@ import { EditorContext } from "../App";
 export function Editor() {
   const {
     selectedFile,
-    setSelectedFile,
-    totalPages,
     setTotalPages,
     pageOrder,
     setPageOrder,
-    movePageUp,
-    movePageDown,
-    deletePage,
     selectedPage,
     setSelectedPage,
   } = useContext(EditorContext);
