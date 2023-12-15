@@ -10,6 +10,7 @@ import "./App.css";
 import { pdfjs } from "react-pdf";
 import Axios from "axios";
 import { Editor } from "./components/editor";
+import { Modal } from "./components/modal";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.js",
@@ -26,6 +27,13 @@ export const EditorContext = createContext({
   movePageUp: (pageNumber: number) => {},
   movePageDown: (pageNumber: number) => {},
   deletePage: (index: number) => {},
+  selectedPage: 1,
+  setSelectedPage: (number: number) => {},
+});
+
+export const ModalContext = createContext({
+  newPDFName: "",
+  setShowModal: (showModal: boolean) => {},
 });
 
 function App() {
@@ -35,6 +43,7 @@ function App() {
     Array.from({ length: totalPages }, (_, index) => index + 1)
   );
   const [newPDFName, setNewPDFName] = useState("");
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const handleUploadClick = () => {
@@ -52,6 +61,8 @@ function App() {
     setNewPDFName("");
   };
 
+  const [selectedPage, setSelectedPage] = useState<number>(1);
+
   const handleFileUpload = () => {
     const fd = new FormData();
     if (selectedFile && pageOrder) {
@@ -61,13 +72,14 @@ function App() {
     Axios.post("http://localhost:4000/upload", fd)
       .then((res) => {
         setNewPDFName(res.data.file);
+        setShowModal(true);
       })
       .catch((err) => console.log(err));
   };
 
-  const movePageUp = (pageNumber: number) => {
+  const movePageUp = () => {
     setPageOrder((prevPageOrder: any) => {
-      const index = prevPageOrder.indexOf(pageNumber);
+      const index = prevPageOrder.indexOf(selectedPage);
       if (index > 0) {
         let newPageOrder = [...prevPageOrder];
         [newPageOrder[index - 1], newPageOrder[index]] = [
@@ -80,9 +92,9 @@ function App() {
     });
   };
 
-  const movePageDown = (pageNumber: number) => {
+  const movePageDown = () => {
     setPageOrder((prevPageOrder: any) => {
-      const index = prevPageOrder.indexOf(pageNumber);
+      const index = prevPageOrder.indexOf(selectedPage);
       if (index < prevPageOrder.length - 1) {
         let newPageOrder = [...prevPageOrder];
         [newPageOrder[index + 1], newPageOrder[index]] = [
@@ -95,10 +107,12 @@ function App() {
     });
   };
 
-  const deletePage = (index: number) => {
+  const deletePage = () => {
     setPageOrder((prevPageOrder: any) => {
       let newPageOrder = [...prevPageOrder];
-      newPageOrder.splice(index, 1);
+      let selectedPageIndex = prevPageOrder.indexOf(selectedPage);
+      newPageOrder.splice(selectedPageIndex, 1);
+      setSelectedPage(newPageOrder[0]);
       return newPageOrder;
     });
   };
@@ -108,7 +122,6 @@ function App() {
   };
 
   return (
-    // <div className="App bg-[#0F0F0F] min-h-screen">
     <div className="App bg-[#1d1d1f] min-h-screen">
       <link
         rel="stylesheet"
@@ -139,40 +152,61 @@ function App() {
         <div>
           <div className="md:container mx-auto flex justify-between px-2 pt-4">
             <button
-              className="font-semibold text-[#0071e3] text-sm hover:bg-[red-800] px-2"
+              className="font-semibold text-[#0071e3] text-sm hover:bg-[red-800] px-2 z-50"
               onClick={unselectFile}
             >
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
-            <div className="space-x-4">
+
+            <div className="fixed inset-x-0 top-0 flex justify-center z-40 p-5 max-[639px]:mt-[75px]">
+              <div className="drop-shadow-2xl">
+                <button
+                  className="px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-l-md shadow-sm ring-1 ring-slate-900/5 hover:bg-[#0071e3] hover:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                  onClick={movePageUp}
+                  disabled={selectedPage === pageOrder[0]}
+                >
+                  <span className="material-symbols-outlined">
+                    arrow_upward
+                  </span>
+                </button>
+                <button
+                  className="px-4 py-2 font-semibold text-sm bg-white text-slate-700  shadow-sm ring-1 ring-slate-900/5 hover:bg-[#0071e3] hover:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                  onClick={movePageDown}
+                  disabled={selectedPage === pageOrder[pageOrder.length - 1]}
+                >
+                  <span className="material-symbols-outlined">
+                    arrow_downward
+                  </span>
+                </button>
+                <button
+                  className="px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-r-md shadow-sm ring-1 ring-slate-900/5 hover:text-white hover:bg-[#f44336] disabled:opacity-70 disabled:cursor-not-allowed"
+                  onClick={deletePage}
+                  disabled={pageOrder.length === 1}
+                >
+                  <span className="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="space-x-4 z-50">
               <button
                 className="underline rounded-full text-[#0071e3] font-semibold text-sm px-2 py-2 hover:bg-white hover:px-2"
                 onClick={resetPDF}
               >
                 Reset
               </button>
-              {!newPDFName && (
-                <button
-                  className="bg-[#0071e3] rounded-full text-white font-semibold text-sm hover:bg-blue-800 px-4 py-2 disabled:opacity-50"
-                  onClick={handleFileUpload} disabled={pageOrder.length===0}
-                >
-                  Get Download Link
-                </button>
-              )}
-              {newPDFName && (
-                <a
-                  className="bg-indigo-900 rounded-full text-white font-semibold text-sm hover:bg-indigo-800 px-4 py-2"
-                  href={"http://localhost:4000/download/" + newPDFName}
-                  download
-                >
-                  Download PDF
-                </a>
-              )}
+
+              <button
+                className="bg-[#0071e3] rounded-full text-white font-semibold text-sm hover:bg-blue-800 px-4 py-2 disabled:opacity-50"
+                onClick={handleFileUpload}
+                disabled={pageOrder.length === 0}
+              >
+                Get Download Link
+              </button>
             </div>
           </div>
 
-          {/* <div className="bg-[#232D3F] md:container mx-auto md:px-2 md:py-2 mt-4 rounded-lg"> */}
-          <div className="bg-[#141414] md:container mx-auto md:px-2 md:py-2 mt-4 rounded-lg">
+          <div className="bg-[#141414] md:container mx-auto md:px-2 md:py-2 mt-4 rounded-lg max-[639px]:mt-[80px]">
             <EditorContext.Provider
               value={{
                 selectedFile,
@@ -184,12 +218,19 @@ function App() {
                 movePageUp,
                 movePageDown,
                 deletePage,
+                selectedPage,
+                setSelectedPage,
               }}
             >
               <Editor></Editor>
             </EditorContext.Provider>
           </div>
         </div>
+      )}
+      {showModal && (
+        <ModalContext.Provider value={{ newPDFName, setShowModal }}>
+          <Modal></Modal>
+        </ModalContext.Provider>
       )}
     </div>
   );

@@ -13,6 +13,8 @@ export function Editor() {
     movePageUp,
     movePageDown,
     deletePage,
+    selectedPage,
+    setSelectedPage,
   } = useContext(EditorContext);
 
   // Code for  dynamic resize of pdf page starts
@@ -41,53 +43,33 @@ export function Editor() {
   };
 
   return (
-    <Document
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
-      file={selectedFile}
-      onLoadSuccess={handleDocLoadSuccess}
-    >
-      {pageOrder.map((pageNumber, index) => (
-        <div
-          className="border-solid border-4 border-[#0071e3] m-2 rounded-md"
-          key={pageNumber}
-          ref={index == 0 ? myDivRef : null}
-          style={{ position: "relative", zIndex: "auto" }}
-        >
-          <div className="overlay absolute z-40 bg-blend-overlay bg-black/50 w-full flex justify-end">
-            {pageNumber}
-            {index !== 0 && (
-              <button
-                className="bg-violet-500 text-white hover:bg-violet-600 active:bg-violet-700 focus:outline-none focus:ring focus:ring-violet-300 rounded-full m-1"
-                onClick={() => movePageUp(pageNumber)}
-              >
-                <span className="material-symbols-outlined">arrow_upward</span>
-              </button>
-            )}
-            {index !== totalPages - 1 && (
-              <button
-                className="bg-violet-500 text-white hover:bg-violet-600 active:bg-violet-700 focus:outline-none focus:ring focus:ring-violet-300 rounded-full m-1"
-                onClick={() => movePageDown(pageNumber)}
-              >
-                <span className="material-symbols-outlined">
-                  arrow_downward
-                </span>
-              </button>
-            )}
-            <button
-              className="bg-red-500 hover:bg-red-600 text-white active:bg-red-700 focus:outline-none focus:ring focus:ring-red-300 rounded-full m-1"
-              onClick={() => deletePage(index)}
-            >
-              <span className="material-symbols-outlined mt-[5px]">delete</span>
-            </button>
+    <div>
+      <Document
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+        file={selectedFile}
+        onLoadSuccess={handleDocLoadSuccess}
+      >
+        {pageOrder.map((pageNumber, index) => (
+          <div
+            className={`border-solid border-[5px] m-2 rounded-md ${
+              selectedPage === pageNumber
+                ? "border-[#0071e3]"
+                : "border-[#fafafa]"
+            }`}
+            key={pageNumber}
+            ref={index === 0 ? myDivRef : null}
+            style={{ position: "relative", zIndex: "auto" }}
+            onClick={() => setSelectedPage(pageNumber)}
+          >
+            <Page
+              pageNumber={pageNumber}
+              width={pageWidth - 8}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
+            ></Page>
           </div>
-          <Page
-            pageNumber={pageNumber}
-            width={pageWidth - 8}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-          ></Page>
-        </div>
-      ))}
-    </Document>
+        ))}
+      </Document>
+    </div>
   );
 }
