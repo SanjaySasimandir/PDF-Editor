@@ -42,7 +42,7 @@ export function Modal() {
                         type="button"
                         className="inline-flex w-full justify-center rounded-full bg-[#0071e3] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 sm:ml-3 sm:w-auto"
                         href={"http://localhost:4000/download/" + newPDFName}
-                        download
+                        download onClick={handleCloseModal}
                       >
                         Download
                       </a>

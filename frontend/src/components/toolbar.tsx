@@ -61,7 +61,7 @@ export function Toolbar() {
           onClick={handleFileUpload}
           disabled={pageOrder.length === 0}
         >
-          Get Download Link
+          Finish
         </button>
       </div>
     </div>
