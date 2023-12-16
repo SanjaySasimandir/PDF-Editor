@@ -31,7 +31,7 @@ export function Toolbar() {
             <span className="material-symbols-outlined">arrow_upward</span>
           </button>
           <button
-            className="px-4 py-2 font-semibold text-sm bg-white text-slate-700  shadow-sm ring-1 ring-slate-900/5 hover:bg-[#0071e3] hover:text-white disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-4 py-2 font-semibold text-sm bg-white text-slate-700 shadow-sm ring-1 ring-slate-900/5 hover:bg-[#0071e3] hover:text-white disabled:opacity-70 disabled:cursor-not-allowed"
             onClick={movePageDown}
             disabled={selectedPage === pageOrder[pageOrder.length - 1]}
           >
@@ -41,6 +41,7 @@ export function Toolbar() {
             className="px-4 py-2 font-semibold text-sm bg-white text-slate-700 rounded-r-md shadow-sm ring-1 ring-slate-900/5 hover:text-white hover:bg-[#f44336] disabled:opacity-70 disabled:cursor-not-allowed"
             onClick={deletePage}
             disabled={pageOrder.length === 1}
+            aria-label="Delete Page"
           >
             <span className="material-symbols-outlined">delete</span>
           </button>

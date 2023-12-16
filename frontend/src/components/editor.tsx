@@ -56,6 +56,9 @@ export function Editor() {
             style={{ position: "relative", zIndex: "auto" }}
             onClick={() => setSelectedPage(pageNumber)}
           >
+            <div className="overlay absolute z-40 bg-blend-overlay bg-black/50 rounded-full px-4 py-2 m-2 text-white font-semibold shadow-2xl">
+              {pageNumber}
+            </div>
             <Page
               pageNumber={pageNumber}
               width={pageWidth - 8}

@@ -135,7 +135,7 @@ function App() {
       {!!!selectedFile && (
         <div className="flex items-center justify-center h-screen">
           <button
-            className="px-4 py-2 font-semibold text-sm bg-cyan-500 text-white rounded-full shadow-sm hover:bg-cyan-600 
+            className="px-4 py-2 font-semibold text-sm bg-[#0071e3] text-white rounded-full shadow-sm hover:bg-blue-800 
         active:bg-cyan-700 focus:outline-none focus:ring focus:ring-cyan-300 scale-125"
             onClick={handleUploadClick}
           >
@@ -153,7 +153,7 @@ function App() {
       />
 
       {selectedFile && (
-        <div>
+        <div className="pb-5">
           <ToolbarContext.Provider
             value={{
               pageOrder,
